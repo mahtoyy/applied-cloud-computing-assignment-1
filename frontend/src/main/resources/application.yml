@@ -1,0 +1,9 @@
+spring:
+  application.name: frontend
+  http.clients:
+    connect-timeout: 2s
+    read-timeout: 5s
+    imperative.factory: simple
+gateway.url: ${GATEWAY_URL}
+management:
+  endpoint.health.probes.enabled: true
