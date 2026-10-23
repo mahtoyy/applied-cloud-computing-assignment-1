@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(${equipment.id == null ? 'Add equipment' : 'Edit equipment'})}"></head>
+<body>
+<header th:replace="~{layout :: header}"></header>
+<main class="container">
+    <div th:replace="~{layout :: messages}"></div>
+    <h1 th:text="${equipment.id == null ? 'Add equipment' : 'Edit equipment'}">Add equipment</h1>
+    <form class="form" method="post"
+          th:action="${equipment.id == null} ? @{/equipment} : @{/equipment/{id}(id=${equipment.id})}"
+          th:object="${equipment}">
+        <label>Hostname
+            <input type="text" th:field="*{hostname}" maxlength="100">
+            <span class="field-error" th:errors="*{hostname}"></span>
+        </label>
+        <label>Vendor
+            <input type="text" th:field="*{vendor}" maxlength="50">
+            <span class="field-error" th:errors="*{vendor}"></span>
+        </label>
+        <label>Model
+            <input type="text" th:field="*{model}" maxlength="50">
+            <span class="field-error" th:errors="*{model}"></span>
+        </label>
+        <label>Serial number
+            <input type="text" th:field="*{serialNumber}" maxlength="50">
+            <span class="field-error" th:errors="*{serialNumber}"></span>
+        </label>
+        <label>Type
+            <select th:field="*{type}">
+                <option th:each="o : ${equipmentTypes}" th:value="${o}" th:text="${o}">TYPE</option>
+            </select>
+            <span class="field-error" th:errors="*{type}"></span>
+        </label>
+        <label>Status
+            <select th:field="*{status}">
+                <option th:each="o : ${equipmentStatuses}" th:value="${o}" th:text="${o}">STATUS</option>
+            </select>
+            <span class="field-error" th:errors="*{status}"></span>
+        </label>
+        <label>IP address (optional)
+            <input type="text" th:field="*{ipAddress}" maxlength="45">
+            <span class="field-error" th:errors="*{ipAddress}"></span>
+        </label>
+        <label>Site
+            <select th:field="*{siteId}">
+                <option th:each="s : ${sites}" th:value="${s.id}"
+                        th:text="${s.code + ' – ' + s.name}">CODE – Name</option>
+            </select>
+            <span class="field-error" th:errors="*{siteId}"></span>
+        </label>
+        <div class="actions">
+            <button type="submit" class="button">Save</button>
+            <a class="button secondary"
+               th:href="${equipment.siteId == null} ? @{/sites} : @{/sites/{id}(id=${equipment.siteId})}">Cancel</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>
