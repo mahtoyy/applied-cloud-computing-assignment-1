@@ -47,7 +47,7 @@ class GatewayRoutingTest {
         String body = new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8);
         int status = 200;
         String json = "{\"path\":\"%s\",\"query\":\"%s\",\"method\":\"%s\",\"body\":\"%s\"}".formatted(
-            path, query == null ? "" : query, exchange.getRequestMethod(), body.replace("\"", "BS\""));
+            path, query == null ? "" : query, exchange.getRequestMethod(), body.replace("\"", "\\\""));
         if (path.equals("/api/sites/404")) {
             status = 404;
             json = "{\"status\":404,\"message\":\"Site 404 not found\"}";
