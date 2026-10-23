@@ -58,6 +58,7 @@ public class SiteService {
         Site site = getOrThrow(id);
         long count = equipmentClient.countBySite(id);
         if (count > 0) {
+            log.info("Refusing to delete site {}: {} equipment items installed", site.getCode(), count);
             throw new ConflictException("Site " + site.getCode() + " still has " + count + " equipment items");
         }
         repository.delete(site);

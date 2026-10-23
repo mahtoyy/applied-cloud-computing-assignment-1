@@ -140,6 +140,8 @@ class SiteControllerTest {
         mvc.perform(delete("/api/sites/1"))
             .andExpect(status().isConflict())
             .andExpect(jsonPath("$.message").value("Site SOF-001 still has 3 equipment items"));
+        mvc.perform(get("/api/sites/1"))
+            .andExpect(status().isOk());
     }
 
     @Test
