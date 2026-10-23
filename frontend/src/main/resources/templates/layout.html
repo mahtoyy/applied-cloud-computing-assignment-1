@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' - Network Inventory'">Network Inventory</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="site-header" th:fragment="header">
+    <div class="container">
+        <a class="brand" th:href="@{/sites}">Network Inventory</a>
+    </div>
+</header>
+
+<!-- shows ?msg= in green and ?error= in red; a controller-set "error" model value wins over the param -->
+<div th:fragment="messages">
+    <div class="message message-ok" th:if="${param.msg != null}" th:text="${param.msg[0]}"></div>
+    <div class="message message-error" th:if="${error != null}" th:text="${error}"></div>
+    <div class="message message-error" th:if="${error == null and param.error != null}"
+         th:text="${param.error[0]}"></div>
+</div>
+
+<span th:fragment="badge(value)" class="badge" th:classappend="'status-' + ${value}"
+      th:text="${value}">STATUS</span>
+</body>
+</html>

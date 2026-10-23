@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(${site.id == null ? 'Add site' : 'Edit site'})}"></head>
+<body>
+<header th:replace="~{layout :: header}"></header>
+<main class="container">
+    <div th:replace="~{layout :: messages}"></div>
+    <h1 th:text="${site.id == null ? 'Add site' : 'Edit site'}">Add site</h1>
+    <form class="form" method="post"
+          th:action="${site.id == null} ? @{/sites} : @{/sites/{id}(id=${site.id})}"
+          th:object="${site}">
+        <label>Code
+            <input type="text" th:field="*{code}" maxlength="20">
+            <span class="field-error" th:errors="*{code}"></span>
+        </label>
+        <label>Name
+            <input type="text" th:field="*{name}" maxlength="100">
+            <span class="field-error" th:errors="*{name}"></span>
+        </label>
+        <label>Address (optional)
+            <input type="text" th:field="*{address}" maxlength="200">
+            <span class="field-error" th:errors="*{address}"></span>
+        </label>
+        <label>City
+            <input type="text" th:field="*{city}" maxlength="100">
+            <span class="field-error" th:errors="*{city}"></span>
+        </label>
+        <label>Type
+            <select th:field="*{type}">
+                <option th:each="o : ${siteTypes}" th:value="${o}" th:text="${o}">TYPE</option>
+            </select>
+            <span class="field-error" th:errors="*{type}"></span>
+        </label>
+        <label>Status
+            <select th:field="*{status}">
+                <option th:each="o : ${siteStatuses}" th:value="${o}" th:text="${o}">STATUS</option>
+            </select>
+            <span class="field-error" th:errors="*{status}"></span>
+        </label>
+        <div class="actions">
+            <button type="submit" class="button">Save</button>
+            <a class="button secondary"
+               th:href="${site.id == null} ? @{/sites} : @{/sites/{id}(id=${site.id})}">Cancel</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

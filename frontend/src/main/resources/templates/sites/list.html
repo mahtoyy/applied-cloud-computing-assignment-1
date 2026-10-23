@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Sites')}"></head>
+<body>
+<header th:replace="~{layout :: header}"></header>
+<main class="container">
+    <div th:replace="~{layout :: messages}"></div>
+    <div class="page-title">
+        <h1>Sites</h1>
+        <a class="button" th:href="@{/sites/new}">Add site</a>
+    </div>
+    <table th:if="${!sites.isEmpty()}">
+        <thead>
+        <tr><th>Code</th><th>Name</th><th>City</th><th>Type</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="s : ${sites}">
+            <td><a th:href="@{/sites/{id}(id=${s.id})}" th:text="${s.code}">SOF-001</a></td>
+            <td th:text="${s.name}">Name</td>
+            <td th:text="${s.city}">City</td>
+            <td th:text="${s.type}">TYPE</td>
+            <td><span th:replace="~{layout :: badge(${s.status})}"></span></td>
+        </tr>
+        </tbody>
+    </table>
+    <p class="empty" th:if="${sites.isEmpty()}">No sites yet.</p>
+</main>
+</body>
+</html>

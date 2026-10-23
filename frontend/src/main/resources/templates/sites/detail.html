@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head(${site.code})}"></head>
+<body>
+<header th:replace="~{layout :: header}"></header>
+<main class="container">
+    <div th:replace="~{layout :: messages}"></div>
+    <div class="page-title">
+        <h1><span th:text="${site.code}">SOF-001</span> <span th:text="${site.name}">Name</span></h1>
+        <div class="actions">
+            <a class="button" th:href="@{/sites/{id}/edit(id=${site.id})}">Edit site</a>
+            <form th:action="@{/sites/{id}/delete(id=${site.id})}" method="post"
+                  onsubmit="return confirm('Delete this site?')">
+                <button type="submit" class="button danger">Delete site</button>
+            </form>
+        </div>
+    </div>
+
+    <dl class="details">
+        <dt>Code</dt><dd th:text="${site.code}">code</dd>
+        <dt>Name</dt><dd th:text="${site.name}">name</dd>
+        <dt>Address</dt><dd th:text="${site.address != null ? site.address : '-'}">address</dd>
+        <dt>City</dt><dd th:text="${site.city}">city</dd>
+        <dt>Type</dt><dd th:text="${site.type}">type</dd>
+        <dt>Status</dt><dd><span th:replace="~{layout :: badge(${site.status})}"></span></dd>
+    </dl>
+
+    <div class="page-title">
+        <h2>Equipment</h2>
+        <a class="button" th:href="@{/sites/{id}/equipment/new(id=${site.id})}">Add equipment</a>
+    </div>
+    <table th:if="${!equipment.isEmpty()}">
+        <thead>
+        <tr><th>Hostname</th><th>Vendor</th><th>Model</th><th>Type</th><th>Status</th><th>IP</th><th></th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="e : ${equipment}">
+            <td th:text="${e.hostname}">host</td>
+            <td th:text="${e.vendor}">vendor</td>
+            <td th:text="${e.model}">model</td>
+            <td th:text="${e.type}">TYPE</td>
+            <td><span th:replace="~{layout :: badge(${e.status})}"></span></td>
+            <td th:text="${e.ipAddress != null ? e.ipAddress : '-'}">ip</td>
+            <td class="actions">
+                <a class="button small" th:href="@{/equipment/{id}/edit(id=${e.id})}">Edit</a>
+                <form th:action="@{/equipment/{id}/delete(id=${e.id})}" method="post"
+                      onsubmit="return confirm('Delete this equipment?')">
+                    <button type="submit" class="button small danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p class="empty" th:if="${equipment.isEmpty()}">No equipment installed at this site.</p>
+</main>
+</body>
+</html>

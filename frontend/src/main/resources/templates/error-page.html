@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{layout :: head('Error')}"></head>
+<body>
+<header th:replace="~{layout :: header}"></header>
+<main class="container">
+    <h1>Something went wrong</h1>
+    <div class="message message-error" th:text="${message}">Error message</div>
+    <p><a class="button" th:href="@{/sites}">Back to sites</a></p>
+</main>
+</body>
+</html>
