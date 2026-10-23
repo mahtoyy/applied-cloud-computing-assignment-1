@@ -28,5 +28,46 @@ services:
         condition: service_healthy
     restart: "no"
 
+  site-service:
+    build: ./site-service
+    image: site-service:dev
+    environment:
+      DB_URL: jdbc:sqlserver://db:1433;databaseName=sitedb;encrypt=true;trustServerCertificate=true
+      DB_USERNAME: site_user
+      DB_PASSWORD: ${SITE_DB_PASSWORD}
+      EQUIPMENT_SERVICE_URL: http://equipment-service:8080
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+
+  equipment-service:
+    build: ./equipment-service
+    image: equipment-service:dev
+    environment:
+      DB_URL: jdbc:sqlserver://db:1433;databaseName=equipmentdb;encrypt=true;trustServerCertificate=true
+      DB_USERNAME: equipment_user
+      DB_PASSWORD: ${EQUIPMENT_DB_PASSWORD}
+      SITE_SERVICE_URL: http://site-service:8080
+    depends_on:
+      db-init:
+        condition: service_completed_successfully
+
+  api-gateway:
+    build: ./api-gateway
+    image: api-gateway:dev
+    environment:
+      SITE_SERVICE_URL: http://site-service:8080
+      EQUIPMENT_SERVICE_URL: http://equipment-service:8080
+    ports:
+      - "8081:8080"
+
+  frontend:
+    build: ./frontend
+    image: frontend:dev
+    environment:
+      GATEWAY_URL: http://api-gateway:8080
+    ports:
+      - "8080:8080"
+
 volumes:
   mssql-data:

@@ -4,10 +4,10 @@ GO
 IF DB_ID('equipmentdb') IS NULL CREATE DATABASE equipmentdb;
 GO
 IF NOT EXISTS (SELECT 1 FROM sys.server_principals WHERE name = 'site_user')
-    CREATE LOGIN site_user WITH PASSWORD = '$(SITE_DB_PASSWORD)', CHECK_POLICY = OFF;
+    CREATE LOGIN site_user WITH PASSWORD = '$(SITE_DB_PASSWORD)';
 GO
 IF NOT EXISTS (SELECT 1 FROM sys.server_principals WHERE name = 'equipment_user')
-    CREATE LOGIN equipment_user WITH PASSWORD = '$(EQUIPMENT_DB_PASSWORD)', CHECK_POLICY = OFF;
+    CREATE LOGIN equipment_user WITH PASSWORD = '$(EQUIPMENT_DB_PASSWORD)';
 GO
 USE sitedb;
 IF USER_ID('site_user') IS NULL CREATE USER site_user FOR LOGIN site_user;
