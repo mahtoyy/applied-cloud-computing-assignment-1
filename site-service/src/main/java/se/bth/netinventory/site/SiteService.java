@@ -73,7 +73,7 @@ public class SiteService {
     private void apply(Site site, SiteDto dto) {
         site.setCode(dto.code());
         site.setName(dto.name());
-        site.setAddress(dto.address());
+        site.setAddress(dto.address() == null || dto.address().isBlank() ? null : dto.address());
         site.setCity(dto.city());
         site.setType(dto.type());
         site.setStatus(dto.status());

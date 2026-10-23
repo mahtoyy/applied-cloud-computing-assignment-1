@@ -162,4 +162,12 @@ class SiteControllerTest {
 
         verifyNoInteractions(equipmentClient);
     }
+
+    @Test
+    void blankAddressIsStoredAsNull() throws Exception {
+        String body = json("RSE-002", "Ruse Two").replace("1 Main St", "");
+        mvc.perform(withBody(post("/api/sites"), body))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.address").doesNotExist());
+    }
 }
