@@ -45,6 +45,7 @@
                 <a class="button small" th:href="@{/equipment/{id}/edit(id=${e.id})}">Edit</a>
                 <form th:action="@{/equipment/{id}/delete(id=${e.id})}" method="post"
                       onsubmit="return confirm('Delete this equipment?')">
+                    <input type="hidden" name="siteId" th:value="${site.id}">
                     <button type="submit" class="button small danger">Delete</button>
                 </form>
             </td>

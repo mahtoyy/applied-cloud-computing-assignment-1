@@ -92,7 +92,8 @@ class SiteControllerTest {
         given(gateway.listEquipment(1)).willReturn(List.of(equipment(7, "DOWN")));
         mvc.perform(get("/sites/1")).andExpect(status().isOk())
             .andExpect(content().string(containsString("sof-core-rtr-01")))
-            .andExpect(content().string(containsString("status-DOWN")));
+            .andExpect(content().string(containsString("status-DOWN")))
+            .andExpect(content().string(containsString("name=\"siteId\"")));
     }
 
     @Test
