@@ -44,7 +44,7 @@
         <label>Site
             <select th:field="*{siteId}">
                 <option th:each="s : ${sites}" th:value="${s.id}"
-                        th:text="${s.code + ' – ' + s.name}">CODE – Name</option>
+                        th:text="${s.name == null ? s.code : s.code + ' – ' + s.name}">CODE – Name</option>
             </select>
             <span class="field-error" th:errors="*{siteId}"></span>
         </label>

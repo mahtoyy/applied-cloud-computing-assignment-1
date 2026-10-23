@@ -143,6 +143,21 @@ class EquipmentControllerTest {
     }
 
     @Test
+    void formStaysUsableWhenSiteListAlsoFails() throws Exception {
+        given(gateway.createEquipment(any()))
+            .willThrow(new ApiException(503, "Site service unavailable"));
+        given(gateway.listSites())
+            .willThrow(new ApiException(503, "Backend unavailable, please try again later"));
+
+        mvc.perform(withValidParams(post("/equipment"), "3"))
+            .andExpect(status().isOk())
+            .andExpect(view().name("equipment/form"))
+            .andExpect(content().string(containsString("Site service unavailable")))
+            .andExpect(content().string(containsString("var-rad-01")))
+            .andExpect(content().string(containsString("Site #3")));
+    }
+
+    @Test
     void blankIpIsSentAsNull() throws Exception {
         given(gateway.createEquipment(any())).willReturn(equipment(7));
 

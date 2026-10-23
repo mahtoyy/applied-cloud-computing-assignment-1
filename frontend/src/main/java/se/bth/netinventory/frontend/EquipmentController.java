@@ -1,6 +1,7 @@
 package se.bth.netinventory.frontend;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -86,8 +87,29 @@ public class EquipmentController {
 
     /** The site list feeds the site select, which is also how equipment is moved. */
     private String form(Model model) {
-        model.addAttribute("sites", gateway.listSites());
+        List<Site> sites;
+        try {
+            sites = gateway.listSites();
+        } catch (ApiException e) {
+            log.warn("Site list unavailable: {} {}", e.getStatus(), e.getMessage());
+            sites = fallbackSites((Equipment) model.getAttribute("equipment"));
+            if (!model.containsAttribute("error")) {
+                model.addAttribute("error", e.getMessage());
+            }
+        }
+        model.addAttribute("sites", sites);
         return "equipment/form";
+    }
+
+    /** Keeps the current site selectable when the site list cannot be loaded. */
+    private static List<Site> fallbackSites(Equipment equipment) {
+        if (equipment == null || equipment.getSiteId() == null) {
+            return List.of();
+        }
+        Site site = new Site();
+        site.setId(equipment.getSiteId());
+        site.setCode("Site #" + equipment.getSiteId());
+        return List.of(site);
     }
 
     private static String savedRedirect(Long siteId) {
