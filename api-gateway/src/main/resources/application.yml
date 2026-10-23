@@ -1,0 +1,15 @@
+spring:
+  application.name: api-gateway
+  http.clients:
+    connect-timeout: 2s
+    read-timeout: 5s
+    imperative.factory: simple
+  cloud.gateway.server.webmvc.routes:
+    - id: site-service
+      uri: ${SITE_SERVICE_URL}
+      predicates: [ "Path=/api/sites,/api/sites/**" ]
+    - id: equipment-service
+      uri: ${EQUIPMENT_SERVICE_URL}
+      predicates: [ "Path=/api/equipment,/api/equipment/**" ]
+management.endpoint.health.probes.enabled: true
+logging.level.org.springframework.cloud.gateway: INFO
