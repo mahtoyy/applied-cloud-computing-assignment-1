@@ -185,4 +185,13 @@ class EquipmentControllerTest {
         mvc.perform(post("/equipment/7/delete").param("siteId", "3"))
             .andExpect(redirectedUrl("/sites/3?error=Equipment%20service%20unavailable"));
     }
+
+    @Test
+    void newFormForUnknownSiteShows404Page() throws Exception {
+        given(gateway.getSite(999)).willThrow(new ApiException(404, "Site 999 not found"));
+
+        mvc.perform(get("/sites/999/equipment/new"))
+            .andExpect(status().isNotFound())
+            .andExpect(view().name("error-page"));
+    }
 }

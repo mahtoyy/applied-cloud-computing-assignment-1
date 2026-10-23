@@ -11,6 +11,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -177,5 +178,15 @@ class SiteControllerTest {
             .andExpect(status().isOk())
             .andExpect(content().string(containsString("&lt;script&gt;")))
             .andExpect(content().string(not(containsString("<script>x"))));
+    }
+
+    @Test
+    void detailStillShowsSiteWhenEquipmentListFails() throws Exception {
+        given(gateway.getSite(1)).willReturn(site(1));
+        given(gateway.listEquipment(1)).willThrow(new ApiException(503, "Backend unavailable"));
+        mvc.perform(get("/sites/1")).andExpect(status().isOk())
+            .andExpect(view().name("sites/detail"))
+            .andExpect(model().attribute("error", "Equipment list unavailable: Backend unavailable"))
+            .andExpect(content().string(containsString("Equipment list unavailable")));
     }
 }

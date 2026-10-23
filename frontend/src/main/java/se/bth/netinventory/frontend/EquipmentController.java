@@ -27,6 +27,14 @@ public class EquipmentController {
 
     @GetMapping("/sites/{siteId}/equipment/new")
     public String newForm(@PathVariable long siteId, Model model) {
+        try {
+            gateway.getSite(siteId); // unknown site id -> 404 error page
+        } catch (ApiException e) {
+            if (e.getStatus() < 500) {
+                throw e;
+            }
+            log.warn("Could not verify site {}: {} {}", siteId, e.getStatus(), e.getMessage());
+        }
         Equipment equipment = new Equipment();
         equipment.setSiteId(siteId);
         equipment.setType("ROUTER");

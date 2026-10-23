@@ -2,7 +2,7 @@ spring:
   application.name: frontend
   http.clients:
     connect-timeout: 2s
-    read-timeout: 5s
+    read-timeout: 8s
     imperative.factory: simple
 gateway.url: ${GATEWAY_URL}
 management:

@@ -1,6 +1,7 @@
 package se.bth.netinventory.frontend;
 
 import jakarta.validation.Valid;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
@@ -37,7 +38,13 @@ public class SiteController {
     @GetMapping("/sites/{id}")
     public String detail(@PathVariable long id, Model model) {
         model.addAttribute("site", gateway.getSite(id));
-        model.addAttribute("equipment", gateway.listEquipment(id));
+        try {
+            model.addAttribute("equipment", gateway.listEquipment(id));
+        } catch (ApiException e) {
+            log.warn("Equipment list for site {} unavailable: {} {}", id, e.getStatus(), e.getMessage());
+            model.addAttribute("equipment", List.of());
+            model.addAttribute("error", "Equipment list unavailable: " + e.getMessage());
+        }
         return "sites/detail";
     }
 

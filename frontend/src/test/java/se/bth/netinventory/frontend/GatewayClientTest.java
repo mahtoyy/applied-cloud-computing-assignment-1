@@ -67,12 +67,12 @@ class GatewayClientTest {
     @Test
     void unparseableErrorBodyFallsBack() {
         server.expect(requestTo("http://gateway/api/equipment/9"))
-            .andRespond(withStatus(HttpStatus.BAD_GATEWAY).body("<html>oops</html>"));
+            .andRespond(withStatus(HttpStatus.NOT_FOUND).body("<html>oops</html>"));
 
         assertThatThrownBy(() -> client.getEquipment(9))
             .isInstanceOfSatisfying(ApiException.class, e -> {
-                assertThat(e.getStatus()).isEqualTo(502);
-                assertThat(e.getMessage()).isEqualTo("Request failed (502)");
+                assertThat(e.getStatus()).isEqualTo(404);
+                assertThat(e.getMessage()).isEqualTo("Request failed (404)");
             });
     }
 
@@ -80,6 +80,20 @@ class GatewayClientTest {
     void unreachableBecomes503() {
         server.expect(requestTo("http://gateway/api/sites"))
             .andRespond(withException(new ConnectException()));
+
+        assertThatThrownBy(client::listSites)
+            .isInstanceOfSatisfying(ApiException.class, e -> {
+                assertThat(e.getStatus()).isEqualTo(503);
+                assertThat(e.getMessage()).isEqualTo("Backend unavailable, please try again later");
+            });
+    }
+
+    @Test
+    void bareServerErrorBodyBecomes503() {
+        server.expect(requestTo("http://gateway/api/sites"))
+            .andRespond(withStatus(HttpStatus.INTERNAL_SERVER_ERROR).contentType(MediaType.APPLICATION_JSON)
+                .body("{\"timestamp\":\"2026-01-01T00:00:00Z\",\"status\":500,"
+                    + "\"error\":\"Internal Server Error\",\"path\":\"/api/sites\"}"));
 
         assertThatThrownBy(client::listSites)
             .isInstanceOfSatisfying(ApiException.class, e -> {

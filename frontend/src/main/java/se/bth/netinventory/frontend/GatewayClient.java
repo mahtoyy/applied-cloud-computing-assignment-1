@@ -103,13 +103,20 @@ public class GatewayClient {
                       ClientHttpResponse response) throws IOException {
         int status = response.getStatusCode().value();
         String message = "Request failed (" + status + ")";
+        boolean hasMessage = false;
         try {
             JsonNode node = MAPPER.readTree(response.getBody());
             if (node.hasNonNull("message")) {
                 message = node.get("message").asString();
+                hasMessage = true;
             }
         } catch (RuntimeException e) {
             // body missing or not JSON: keep the generic message
+        }
+        if (status >= 500 && !hasMessage) {
+            // a bare Boot error body means the backend itself is broken or unreachable
+            status = 503;
+            message = "Backend unavailable, please try again later";
         }
         throw new ApiException(status, message);
     }
