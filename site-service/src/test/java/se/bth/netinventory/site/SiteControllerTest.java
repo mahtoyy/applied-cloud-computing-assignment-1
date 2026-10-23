@@ -1,5 +1,7 @@
 package se.bth.netinventory.site;
 
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -12,9 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
+import se.bth.netinventory.site.error.ServiceUnavailableException;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -22,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 class SiteControllerTest {
 
     @Autowired MockMvc mvc;
+    @MockitoBean EquipmentClient equipmentClient;
 
     private static String json(String code, String name) {
         return """
@@ -116,5 +121,43 @@ class SiteControllerTest {
     void deleteMissingReturns404() throws Exception {
         mvc.perform(delete("/api/sites/999"))
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteSiteWithoutEquipmentReturns204() throws Exception {
+        when(equipmentClient.countBySite(4L)).thenReturn(0L);
+
+        mvc.perform(delete("/api/sites/4"))
+            .andExpect(status().isNoContent());
+        mvc.perform(get("/api/sites/4"))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void deleteSiteWithEquipmentReturns409() throws Exception {
+        when(equipmentClient.countBySite(1L)).thenReturn(3L);
+
+        mvc.perform(delete("/api/sites/1"))
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.message").value("Site SOF-001 still has 3 equipment items"));
+    }
+
+    @Test
+    void deleteWhenEquipmentDownReturns503() throws Exception {
+        when(equipmentClient.countBySite(1L))
+            .thenThrow(new ServiceUnavailableException("Equipment service unavailable"));
+
+        mvc.perform(delete("/api/sites/1"))
+            .andExpect(status().isServiceUnavailable());
+        mvc.perform(get("/api/sites/1"))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    void deleteMissingDoesNotCallEquipment() throws Exception {
+        mvc.perform(delete("/api/sites/999"))
+            .andExpect(status().isNotFound());
+
+        verifyNoInteractions(equipmentClient);
     }
 }

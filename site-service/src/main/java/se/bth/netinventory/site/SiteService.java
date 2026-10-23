@@ -15,9 +15,11 @@ public class SiteService {
     private static final Logger log = LoggerFactory.getLogger(SiteService.class);
 
     private final SiteRepository repository;
+    private final EquipmentClient equipmentClient;
 
-    public SiteService(SiteRepository repository) {
+    public SiteService(SiteRepository repository, EquipmentClient equipmentClient) {
         this.repository = repository;
+        this.equipmentClient = equipmentClient;
     }
 
     @Transactional(readOnly = true)
@@ -54,6 +56,10 @@ public class SiteService {
 
     public void delete(Long id) {
         Site site = getOrThrow(id);
+        long count = equipmentClient.countBySite(id);
+        if (count > 0) {
+            throw new ConflictException("Site " + site.getCode() + " still has " + count + " equipment items");
+        }
         repository.delete(site);
         log.info("Deleted site {} (id {})", site.getCode(), site.getId());
     }
