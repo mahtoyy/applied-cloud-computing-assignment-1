@@ -1,0 +1,8 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:equipmentdb;MODE=MSSQLServer;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+  test.database.replace: none
+site-service.url: http://site.test
+logging.level.org.flywaydb.core.internal.database.base.Database: ERROR

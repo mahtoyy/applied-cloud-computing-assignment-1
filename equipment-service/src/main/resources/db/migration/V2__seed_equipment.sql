@@ -1,0 +1,11 @@
+INSERT INTO equipment (hostname, vendor, model, serial_number, type, status, ip_address, site_id) VALUES ('sof-core-rtr-01', 'Cisco', 'ASR 9001', 'FOC2301A1B1', 'ROUTER', 'IN_SERVICE', '10.1.0.1', 1);
+INSERT INTO equipment (hostname, vendor, model, serial_number, type, status, ip_address, site_id) VALUES ('sof-core-rtr-02', 'Juniper', 'MX204', 'JN2301C2D2', 'ROUTER', 'IN_SERVICE', '10.1.0.2', 1);
+INSERT INTO equipment (hostname, vendor, model, serial_number, type, status, ip_address, site_id) VALUES ('sof-dist-sw-01', 'Cisco', 'Nexus 9300', 'FDO2302E3F3', 'SWITCH', 'IN_SERVICE', '10.1.1.1', 1);
+INSERT INTO equipment (hostname, vendor, model, serial_number, type, status, ip_address, site_id) VALUES ('sof-fw-01', 'Fortinet', 'FortiGate 600F', 'FGT6002304G4H4', 'FIREWALL', 'IN_SERVICE', '10.1.2.1', 1);
+INSERT INTO equipment (hostname, vendor, model, serial_number, type, status, ip_address, site_id) VALUES ('pdv-agg-rtr-01', 'Nokia', '7750 SR-1', 'NS2301J5K5', 'ROUTER', 'IN_SERVICE', '10.2.0.1', 2);
+INSERT INTO equipment (hostname, vendor, model, serial_number, type, status, ip_address, site_id) VALUES ('pdv-acc-sw-01', 'Huawei', 'S6730-H', 'HW2301L6M6', 'SWITCH', 'IN_SERVICE', '10.2.1.1', 2);
+INSERT INTO equipment (hostname, vendor, model, serial_number, type, status, ip_address, site_id) VALUES ('pdv-rad-01', 'Ericsson', 'Radio 4415', 'ER2301N7P7', 'RADIO', 'IN_SERVICE', '10.2.3.1', 2);
+INSERT INTO equipment (hostname, vendor, model, serial_number, type, status, ip_address, site_id) VALUES ('var-rad-01', 'Ericsson', 'Radio 6626', 'ER2302Q8R8', 'RADIO', 'DOWN', '10.3.3.1', 3);
+INSERT INTO equipment (hostname, vendor, model, serial_number, type, status, ip_address, site_id) VALUES ('var-acc-rtr-01', 'Huawei', 'NE8000 M1A', 'HW2302S9T9', 'ROUTER', 'IN_SERVICE', '10.3.0.1', 3);
+INSERT INTO equipment (hostname, vendor, model, serial_number, type, status, ip_address, site_id) VALUES ('bgs-rad-01', 'Nokia', 'AirScale AHEGA', 'NS2302U1V1', 'RADIO', 'PLANNED', NULL, 4);
+INSERT INTO equipment (hostname, vendor, model, serial_number, type, status, ip_address, site_id) VALUES ('bgs-acc-sw-01', 'Juniper', 'EX4400-24T', 'JN2302W2X2', 'SWITCH', 'PLANNED', NULL, 4);
