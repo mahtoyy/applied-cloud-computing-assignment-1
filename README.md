@@ -43,24 +43,25 @@ Note: changing a password in `.env` after the volume exists does not update the 
 
 Manifests are in `k8s/` and are applied with Kustomize (built into `kubectl`). Tested on Docker Desktop Kubernetes.
 
-1. Build and push the images to Docker Hub (replace `<user>` with your Docker Hub username):
+The images are public on Docker Hub as `mahtoyy/<service>:1.0` (`netinventory-db`, `site-service`, `equipment-service`, `api-gateway`, `frontend`), so the cluster pulls them directly.
+
+1. (Only when the code changes) Build and push a new version, then update `newTag` in `k8s/kustomization.yaml`:
 
    ```bash
    docker compose build
    for i in netinventory-db site-service equipment-service api-gateway frontend; do
-     docker tag $i:dev <user>/$i:1.0 && docker push <user>/$i:1.0
+     docker tag $i:dev mahtoyy/$i:1.1 && docker push mahtoyy/$i:1.1
    done
    ```
 
-2. In `k8s/kustomization.yaml`, replace `DOCKERHUB_USER` with your username.
-3. Create the namespace and the password Secret from your `.env` (the Secret is not stored in git):
+2. Create the namespace and the password Secret from your `.env` (the Secret is not stored in git):
 
    ```bash
    kubectl apply -f k8s/namespace.yaml
    kubectl create secret generic db-credentials -n netinventory --from-env-file=.env
    ```
 
-4. Deploy everything and wait until it is ready:
+3. Deploy everything and wait until it is ready:
 
    ```bash
    kubectl apply -k k8s

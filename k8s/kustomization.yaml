@@ -11,10 +11,10 @@ resources:
   - api-gateway.yaml
   - frontend.yaml
   - network-policies.yaml
-# Docker Hub images: set your username here.
+# Docker Hub images (mahtoyy). Change the tag here for a new version.
 images:
-  - { name: netinventory-db, newName: docker.io/DOCKERHUB_USER/netinventory-db, newTag: "1.0" }
-  - { name: site-service, newName: docker.io/DOCKERHUB_USER/site-service, newTag: "1.0" }
-  - { name: equipment-service, newName: docker.io/DOCKERHUB_USER/equipment-service, newTag: "1.0" }
-  - { name: api-gateway, newName: docker.io/DOCKERHUB_USER/api-gateway, newTag: "1.0" }
-  - { name: frontend, newName: docker.io/DOCKERHUB_USER/frontend, newTag: "1.0" }
+  - { name: netinventory-db, newName: docker.io/mahtoyy/netinventory-db, newTag: "1.0" }
+  - { name: site-service, newName: docker.io/mahtoyy/site-service, newTag: "1.0" }
+  - { name: equipment-service, newName: docker.io/mahtoyy/equipment-service, newTag: "1.0" }
+  - { name: api-gateway, newName: docker.io/mahtoyy/api-gateway, newTag: "1.0" }
+  - { name: frontend, newName: docker.io/mahtoyy/frontend, newTag: "1.0" }
