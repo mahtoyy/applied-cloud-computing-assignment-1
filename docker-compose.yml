@@ -1,32 +1,13 @@
 services:
   db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    build: ./db
+    image: netinventory-db:dev
     environment:
-      ACCEPT_EULA: "Y"
       MSSQL_SA_PASSWORD: ${SA_PASSWORD}
-    volumes:
-      - mssql-data:/var/opt/mssql
-    healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q \"SELECT 1\" || exit 1"]
-      interval: 5s
-      timeout: 5s
-      retries: 30
-      start_period: 15s
-
-  db-init:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    entrypoint: ["/bin/bash", "/db/init.sh"]
-    volumes:
-      - ./db:/db:ro
-    environment:
-      DB_HOST: db
-      SA_PASSWORD: ${SA_PASSWORD}
       SITE_DB_PASSWORD: ${SITE_DB_PASSWORD}
       EQUIPMENT_DB_PASSWORD: ${EQUIPMENT_DB_PASSWORD}
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: "no"
+    volumes:
+      - mssql-data:/var/opt/mssql
 
   site-service:
     build: ./site-service
@@ -37,8 +18,8 @@ services:
       DB_PASSWORD: ${SITE_DB_PASSWORD}
       EQUIPMENT_SERVICE_URL: http://equipment-service:8080
     depends_on:
-      db-init:
-        condition: service_completed_successfully
+      db:
+        condition: service_healthy
 
   equipment-service:
     build: ./equipment-service
@@ -49,8 +30,8 @@ services:
       DB_PASSWORD: ${EQUIPMENT_DB_PASSWORD}
       SITE_SERVICE_URL: http://site-service:8080
     depends_on:
-      db-init:
-        condition: service_completed_successfully
+      db:
+        condition: service_healthy
 
   api-gateway:
     build: ./api-gateway

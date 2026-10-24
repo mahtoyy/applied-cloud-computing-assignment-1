@@ -15,7 +15,7 @@ Browser ──► frontend ──► api-gateway ──┬──► site-service
 - `api-gateway`: single entry point for the REST API, routes by path.
 - `site-service`: owns sites; asks equipment-service before deleting a site.
 - `equipment-service`: owns equipment; asks site-service that a site exists on create/move.
-- SQL Server: one container, two databases (`sitedb`, `equipmentdb`), one login per service, persistent volume.
+- SQL Server: one custom image (`db/Dockerfile`) that runs `init.sql` on every start (idempotent), two databases (`sitedb`, `equipmentdb`), one login per service, persistent volume.
 
 The full design is in `docs/superpowers/specs/2026-10-23-network-inventory-design.md`.
 
@@ -48,7 +48,7 @@ site-service/       Spring Boot service + Dockerfile
 equipment-service/  Spring Boot service + Dockerfile
 api-gateway/        Spring Cloud Gateway + Dockerfile
 frontend/           Thymeleaf UI + Dockerfile
-db/                 SQL Server init script (databases, logins)
+db/                 SQL Server image: Dockerfile, entrypoint.sh, init.sql (databases, logins)
 docker-compose.yml  Local run of everything
 k8s/                Kubernetes manifests (added separately)
 docs/               Design spec and plans
