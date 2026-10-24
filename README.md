@@ -39,6 +39,57 @@ Stop with `docker compose down`. Data is kept in the `mssql-data` volume; `docke
 
 Note: changing a password in `.env` after the volume exists does not update the existing database logins. Run `docker compose down -v` to re-initialize.
 
+## Run on Kubernetes
+
+Manifests are in `k8s/` and are applied with Kustomize (built into `kubectl`). Tested on Docker Desktop Kubernetes.
+
+1. Build and push the images to Docker Hub (replace `<user>` with your Docker Hub username):
+
+   ```bash
+   docker compose build
+   for i in netinventory-db site-service equipment-service api-gateway frontend; do
+     docker tag $i:dev <user>/$i:1.0 && docker push <user>/$i:1.0
+   done
+   ```
+
+2. In `k8s/kustomization.yaml`, replace `DOCKERHUB_USER` with your username.
+3. Create the namespace and the password Secret from your `.env` (the Secret is not stored in git):
+
+   ```bash
+   kubectl apply -f k8s/namespace.yaml
+   kubectl create secret generic db-credentials -n netinventory --from-env-file=.env
+   ```
+
+4. Deploy everything and wait until it is ready:
+
+   ```bash
+   kubectl apply -k k8s
+   kubectl get pods -n netinventory -w
+   ```
+
+The UI is at http://localhost:8080 and the REST API at http://localhost:8081/api/sites (LoadBalancer services). On the first start, site-service and equipment-service restart a couple of times until the database is ready. That is expected: Kubernetes restarts them until they connect.
+
+| File | What it creates |
+|---|---|
+| `namespace.yaml` | `netinventory` namespace |
+| `config.yaml` | ConfigMap with database URLs, service URLs and JVM options |
+| `db.yaml` | SQL Server StatefulSet (1 replica) with a 2 Gi PersistentVolumeClaim, and a headless Service `db` |
+| `site-service.yaml`, `equipment-service.yaml` | Deployment (2 replicas) + internal ClusterIP Service |
+| `api-gateway.yaml`, `frontend.yaml` | Deployment (2 replicas) + LoadBalancer Service (ports 8081 and 8080) |
+| `network-policies.yaml` | Deny all incoming traffic, then allow only frontend → gateway → services → db |
+| `kustomization.yaml` | Namespace and Docker Hub image names for all of the above |
+
+Every Spring Boot pod has startup, liveness and readiness probes on `/actuator/health/*`. Readiness for site-service and equipment-service includes the database connection. The db pod is ready once `init.sql` has run.
+
+Useful commands for the demo:
+
+```bash
+kubectl scale deploy/site-service -n netinventory --replicas=3   # scale one service on its own
+kubectl logs -n netinventory deploy/site-service                 # service logs
+kubectl delete pod db-0 -n netinventory                          # data survives: it is on the PVC
+kubectl delete namespace netinventory                            # remove everything, including the data
+```
+
 ## REST API
 
 All endpoints are reached through the gateway. Errors return `{status, error, message}`.
@@ -66,7 +117,7 @@ api-gateway/        Spring Cloud Gateway + Dockerfile
 frontend/           Thymeleaf UI + Dockerfile
 db/                 SQL Server image: Dockerfile, entrypoint.sh, init.sql (databases, logins)
 docker-compose.yml  Local run of everything
-k8s/                Kubernetes manifests (added separately)
+k8s/                Kubernetes manifests (Kustomize)
 ```
 
 Inside `site-service` and `equipment-service` the code is split into packages: `controller` (REST), `service` (business rules), `repository` (Spring Data JPA), `model` (entities, enums), `dto` (request/response bodies), `client` (calls to the other service) and `error` (exceptions and error responses). The frontend has `controller`, `advice`, `client` (gateway client) and `model`. Database schema and seed data are Flyway migrations in `src/main/resources/db/migration`.

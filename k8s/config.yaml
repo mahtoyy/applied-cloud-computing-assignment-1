@@ -1,0 +1,12 @@
+# Non-secret settings. Passwords come from the db-credentials Secret (see README).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+data:
+  SITE_DB_URL: jdbc:sqlserver://db:1433;databaseName=sitedb;encrypt=true;trustServerCertificate=true
+  EQUIPMENT_DB_URL: jdbc:sqlserver://db:1433;databaseName=equipmentdb;encrypt=true;trustServerCertificate=true
+  SITE_SERVICE_URL: http://site-service:8080
+  EQUIPMENT_SERVICE_URL: http://equipment-service:8080
+  GATEWAY_URL: http://api-gateway:8081
+  JAVA_TOOL_OPTIONS: -XX:MaxRAMPercentage=75

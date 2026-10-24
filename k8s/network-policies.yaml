@@ -1,0 +1,63 @@
+# Deny all incoming pod traffic by default, then allow only the calls the app makes.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+spec:
+  podSelector: {}
+  policyTypes: [Ingress]
+---
+# frontend and api-gateway are the public entry points.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-public
+spec:
+  podSelector:
+    matchExpressions:
+      - { key: app, operator: In, values: [frontend, api-gateway] }
+  ingress:
+    - ports:
+        - port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-site-service
+spec:
+  podSelector:
+    matchLabels: { app: site-service }
+  ingress:
+    - from:
+        - podSelector: { matchLabels: { app: api-gateway } }
+        - podSelector: { matchLabels: { app: equipment-service } }
+      ports:
+        - port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-equipment-service
+spec:
+  podSelector:
+    matchLabels: { app: equipment-service }
+  ingress:
+    - from:
+        - podSelector: { matchLabels: { app: api-gateway } }
+        - podSelector: { matchLabels: { app: site-service } }
+      ports:
+        - port: 8080
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-db
+spec:
+  podSelector:
+    matchLabels: { app: db }
+  ingress:
+    - from:
+        - podSelector: { matchLabels: { app: site-service } }
+        - podSelector: { matchLabels: { app: equipment-service } }
+      ports:
+        - port: 1433

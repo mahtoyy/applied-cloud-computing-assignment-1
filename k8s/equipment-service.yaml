@@ -1,0 +1,62 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: equipment-service
+spec:
+  type: ClusterIP
+  selector:
+    app: equipment-service
+  ports:
+    - port: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: equipment-service
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: equipment-service
+  template:
+    metadata:
+      labels:
+        app: equipment-service
+    spec:
+      containers:
+        - name: equipment-service
+          image: equipment-service
+          ports:
+            - containerPort: 8080
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              valueFrom:
+                configMapKeyRef: { name: app-config, key: JAVA_TOOL_OPTIONS }
+            - name: DB_URL
+              valueFrom:
+                configMapKeyRef: { name: app-config, key: EQUIPMENT_DB_URL }
+            - name: DB_USERNAME
+              value: equipment_user
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: db-credentials, key: EQUIPMENT_DB_PASSWORD }
+            - name: SITE_SERVICE_URL
+              valueFrom:
+                configMapKeyRef: { name: app-config, key: SITE_SERVICE_URL }
+          # Spring Boot actuator probes; startupProbe gives the JVM time to boot.
+          startupProbe:
+            httpGet: { path: /actuator/health/liveness, port: 8080 }
+            periodSeconds: 5
+            failureThreshold: 30
+          livenessProbe:
+            httpGet: { path: /actuator/health/liveness, port: 8080 }
+            periodSeconds: 10
+          readinessProbe:
+            httpGet: { path: /actuator/health/readiness, port: 8080 }
+            periodSeconds: 5
+          resources:
+            requests: { cpu: 100m, memory: 256Mi }
+            limits: { memory: 512Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ["ALL"] }

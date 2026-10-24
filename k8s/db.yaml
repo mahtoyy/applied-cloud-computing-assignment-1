@@ -1,0 +1,68 @@
+# SQL Server: one pod (not scaled), data on a PersistentVolumeClaim.
+apiVersion: v1
+kind: Service
+metadata:
+  name: db
+spec:
+  clusterIP: None
+  selector:
+    app: db
+  ports:
+    - port: 1433
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: db
+spec:
+  serviceName: db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      securityContext:
+        fsGroup: 10001 # mssql user, so it can write to the volume
+      containers:
+        - name: db
+          image: netinventory-db
+          ports:
+            - containerPort: 1433
+          env:
+            - name: MSSQL_SA_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: db-credentials, key: SA_PASSWORD }
+            - name: SITE_DB_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: db-credentials, key: SITE_DB_PASSWORD }
+            - name: EQUIPMENT_DB_PASSWORD
+              valueFrom:
+                secretKeyRef: { name: db-credentials, key: EQUIPMENT_DB_PASSWORD }
+          # Ready only after entrypoint.sh has run init.sql.
+          readinessProbe:
+            exec:
+              command: ["test", "-f", "/tmp/init-done"]
+            periodSeconds: 5
+          livenessProbe:
+            tcpSocket:
+              port: 1433
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 250m, memory: 2Gi }
+            limits: { memory: 3Gi }
+          volumeMounts:
+            - name: data
+              mountPath: /var/opt/mssql
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 2Gi
