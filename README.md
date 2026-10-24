@@ -17,8 +17,6 @@ Browser ──► frontend ──► api-gateway ──┬──► site-service
 - `equipment-service`: owns equipment; asks site-service that a site exists on create/move.
 - SQL Server: one custom image (`db/Dockerfile`) that runs `init.sql` on every start (idempotent), two databases (`sitedb`, `equipmentdb`), one login per service, persistent volume.
 
-The full design is in `docs/superpowers/specs/2026-10-23-network-inventory-design.md`.
-
 ## Prerequisites
 
 Docker (Docker Desktop or Docker Engine with the Compose plugin). Nothing else is needed to run the app.
@@ -41,6 +39,24 @@ Stop with `docker compose down`. Data is kept in the `mssql-data` volume; `docke
 
 Note: changing a password in `.env` after the volume exists does not update the existing database logins. Run `docker compose down -v` to re-initialize.
 
+## REST API
+
+All endpoints are reached through the gateway. Errors return `{status, error, message}`.
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/api/sites` | List sites |
+| GET | `/api/sites/{id}` | 404 if missing |
+| POST / PUT | `/api/sites`, `/api/sites/{id}` | 409 if the site code already exists |
+| DELETE | `/api/sites/{id}` | 409 if the site still has equipment |
+| GET | `/api/equipment?siteId={id}` | List equipment, optionally for one site |
+| GET | `/api/equipment/count?siteId={id}` | Used by site-service before delete |
+| GET | `/api/equipment/{id}` | 404 if missing |
+| POST / PUT | `/api/equipment`, `/api/equipment/{id}` | 400 if the site does not exist, 409 on duplicate hostname |
+| DELETE | `/api/equipment/{id}` | |
+
+If the other service is down during a cross-service check, the call returns 503.
+
 ## Project layout
 
 ```
@@ -51,8 +67,9 @@ frontend/           Thymeleaf UI + Dockerfile
 db/                 SQL Server image: Dockerfile, entrypoint.sh, init.sql (databases, logins)
 docker-compose.yml  Local run of everything
 k8s/                Kubernetes manifests (added separately)
-docs/               Design spec and plans
 ```
+
+Inside `site-service` and `equipment-service` the code is split into packages: `controller` (REST), `service` (business rules), `repository` (Spring Data JPA), `model` (entities, enums), `dto` (request/response bodies), `client` (calls to the other service) and `error` (exceptions and error responses). The frontend has `controller`, `advice`, `client` (gateway client) and `model`. Database schema and seed data are Flyway migrations in `src/main/resources/db/migration`.
 
 ## Tests
 
