@@ -67,15 +67,15 @@ Manifests are in `k8s/` and are applied with Kustomize (built into `kubectl`). T
    kubectl get pods -n netinventory -w
    ```
 
-The UI is at http://localhost:8080 and the REST API at http://localhost:8081/api/sites (LoadBalancer services). On the first start, site-service and equipment-service restart a couple of times until the database is ready. That is expected: Kubernetes restarts them until they connect.
+The UI is at http://localhost:8080 (the frontend is a LoadBalancer service; Docker Desktop maps it to localhost). The API gateway is internal only: the frontend renders pages on the server and calls it inside the cluster, so browsers never need it. To call the REST API from your machine, open a temporary tunnel with `kubectl port-forward -n netinventory svc/api-gateway 8081:8080` and use http://localhost:8081/api/sites. On the first start, site-service and equipment-service restart a couple of times until the database is ready. That is expected: Kubernetes restarts them until they connect.
 
 | File | What it creates |
 |---|---|
 | `namespace.yaml` | `netinventory` namespace |
 | `config.yaml` | ConfigMap with database URLs, service URLs and JVM options |
 | `db.yaml` | SQL Server StatefulSet (1 replica) with a 2 Gi PersistentVolumeClaim, and a headless Service `db` |
-| `site-service.yaml`, `equipment-service.yaml` | Deployment (2 replicas) + internal ClusterIP Service |
-| `api-gateway.yaml`, `frontend.yaml` | Deployment (2 replicas) + LoadBalancer Service (ports 8081 and 8080) |
+| `site-service.yaml`, `equipment-service.yaml`, `api-gateway.yaml` | Deployment (2 replicas) + internal ClusterIP Service |
+| `frontend.yaml` | Deployment (2 replicas) + LoadBalancer Service on port 8080 |
 | `network-policies.yaml` | Deny all incoming traffic, then allow only frontend → gateway → services → db |
 | `kustomization.yaml` | Namespace and Docker Hub image names for all of the above |
 

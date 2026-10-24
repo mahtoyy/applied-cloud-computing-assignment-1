@@ -3,12 +3,11 @@ kind: Service
 metadata:
   name: api-gateway
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   selector:
     app: api-gateway
   ports:
-    - port: 8081 # external port
-      targetPort: 8080
+    - port: 8080
 ---
 apiVersion: apps/v1
 kind: Deployment
